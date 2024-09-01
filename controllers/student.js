@@ -71,25 +71,16 @@ async function createStudent(req, res) {
     const discount = totalSubjects > 1 ? 50 * totalSubjects : 0;
     const finalAmount = totalAmount - discount;
 
-    let currentDate = registrationDate ? new Date(registrationDate) : new Date();
-    const dayOfMonth = currentDate.getDate();
+    let currentStartAt = registrationDate ? new Date(registrationDate) : new Date();
 
-    let startMonth = new Date(currentDate);
-    startMonth.setDate(1);
-
-    const endYear = startMonth.getMonth() > 5 ? startMonth.getFullYear() + 1 : startMonth.getFullYear();
+    const endYear = currentStartAt.getMonth() > 5 ? currentStartAt.getFullYear() + 1 : currentStartAt.getFullYear();
     let isFirstPayment = true;
 
-    while (startMonth.getFullYear() < endYear || (startMonth.getFullYear() === endYear && startMonth.getMonth() <= 5)) {
-      const monthName = startMonth.toLocaleString("default", { month: "long" });
+    while (currentStartAt.getFullYear() < endYear || (currentStartAt.getFullYear() === endYear && currentStartAt.getMonth() <= 5)) {
+      const monthName = currentStartAt.toLocaleString("default", { month: "long" });
 
-      const dueDate = new Date(startMonth);
-      dueDate.setMonth(startMonth.getMonth() + 1);
-      dueDate.setDate(dayOfMonth);
-
-      if (dueDate.getDate() !== dayOfMonth) {
-        dueDate.setDate(0); // Last day of the previous month
-      }
+      const dueDate = new Date(currentStartAt);
+      dueDate.setMonth(currentStartAt.getMonth() + 1);
 
       let have50 = 0;
       if (school === "COLLEGE") {
@@ -107,6 +98,7 @@ async function createStudent(req, res) {
           amountPaid: 0,
           amountDue: finalAmount,
           discount: discount,
+          startAt: currentStartAt,
           dueDate: dueDate,
           have50: have50,
           subjects: JSON.stringify(
@@ -122,7 +114,8 @@ async function createStudent(req, res) {
         },
       });
 
-      startMonth.setMonth(startMonth.getMonth() + 1);
+      // Move currentStartAt to the next month's start date
+      currentStartAt = new Date(dueDate); // set currentStartAt to the last dueDate
     }
 
     res.status(201).json({
@@ -136,7 +129,6 @@ async function createStudent(req, res) {
     });
   }
 }
-
 
 
 async function getAllStudents(req, res) {
@@ -330,6 +322,39 @@ async function deleteStudent(req, res) {
     });
   }
 }
+const getStudentsWithPayments = async (req, res) => {
+  const { school } = req.params;
+
+  try {
+    // Fetch students with selected fields and include their payments
+    const students = await prisma.students.findMany({
+      where: {
+        school: school,
+      },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        school:true,
+        payments: {
+          orderBy: {
+            createdAt: "asc",
+          },
+
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    res.status(200).json(students);
+  } catch (error) {
+    res.status(500).json({
+      message: "Erreur lors de la récupération des étudiants avec paiements: " + error.message,
+    });
+  }
+};
 
 module.exports = {
   createStudent,
@@ -337,4 +362,5 @@ module.exports = {
   getStudentById,
   updateStudent,
   deleteStudent,
+  getStudentsWithPayments
 };
