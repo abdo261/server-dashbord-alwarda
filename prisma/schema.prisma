@@ -21,39 +21,39 @@ model Users {
   password  String
   phone     String
   isOwner   Boolean    @default(false)
-  centreId  Int?        @unique
-  centre    Centres?    @relation(fields: [centreId], references: [id],onDelete: SetNull )
+  centreId  Int?       @unique
+  centre    Centres?   @relation(fields: [centreId], references: [id], onDelete: SetNull)
   students  Students[]
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 }
 
 model Levels {
-  id        Int        @id @default(autoincrement())
-  name      String     @unique
-  type    SchoolStady @default(LYCEE)
+  id        Int         @id @default(autoincrement())
+  name      String      @unique
+  type      SchoolStady @default(LYCEE)
   students  Students[]
   subjects  Subjects[]
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
 }
 
 model Students {
-  id               Int      @id @default(autoincrement())
+  id               Int         @id @default(autoincrement())
   firstName        String
   lastName         String
   phoneParent      String
   phone            String
   sex              Sex
   school           SchoolStady @default(LYCEE)
-  registrationDate DateTime  @default(now())
+  registrationDate DateTime    @default(now())
   registredBy      Int?
-  user             Users?    @relation(fields: [registredBy], references: [id],onDelete: SetNull)
+  user             Users?      @relation(fields: [registredBy], references: [id], onDelete: SetNull)
   levelId          Int?
-  level            Levels?   @relation(fields: [levelId], references: [id],onDelete: SetNull)
+  level            Levels?     @relation(fields: [levelId], references: [id], onDelete: SetNull)
   centreId         Int?
-  centre           Centres?  @relation(fields: [centreId], references: [id] ,onDelete: SetNull)
-  
+  centre           Centres?    @relation(fields: [centreId], references: [id], onDelete: SetNull)
+
   subjects  Subjects[]
   payments  Payments[]
   createdAt DateTime   @default(now())
@@ -72,15 +72,15 @@ model Centres {
 }
 
 model Subjects {
-  id            Int        @id @default(autoincrement())
+  id            Int         @id @default(autoincrement())
   name          String
   pricePerMonth Float
-  level         Levels?     @relation(fields: [levelId], references: [id] , onDelete: SetNull)
+  level         Levels?     @relation(fields: [levelId], references: [id], onDelete: SetNull)
   levelId       Int?
   students      Students[]
-  school           SchoolStady @default(LYCEE)
-  teacherId Int? 
-  teacher   Teachers? @relation(fields: [teacherId], references: [id], onDelete: SetNull)
+  school        SchoolStady @default(LYCEE)
+  teacherId     Int?
+  teacher       Teachers?   @relation(fields: [teacherId], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -91,7 +91,7 @@ model Subjects {
 model Payments {
   id          Int      @id @default(autoincrement())
   studentId   Int
-  student     Students @relation(fields: [studentId], references: [id],onDelete: Cascade)
+  student     Students @relation(fields: [studentId], references: [id], onDelete: Cascade)
   month       String
   totalAmount Float
   amountPaid  Float
@@ -99,7 +99,7 @@ model Payments {
   discount    Float
   startAt     DateTime
   dueDate     DateTime
-  have50      Int? @default(0)
+  have50      Int?     @default(0)
   subjects    Json
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -117,6 +117,7 @@ model Teachers {
   updatedAt DateTime   @updatedAt
   Subjects  Subjects[]
 }
+
 // model Dues {
 //   id          Int       @id @default(autoincrement())
 //   teacherId   Int
