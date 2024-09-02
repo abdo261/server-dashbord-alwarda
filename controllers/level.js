@@ -1,9 +1,14 @@
 const { PrismaClient } = require('@prisma/client');
+const { ValidateCreateLevel } = require('../validation/level');
 const prisma = new PrismaClient();
 
 // Create a Level
 async function createLevel(req, res) {
-  const { name } = req.body;
+  const { name ,type} = req.body;
+  const { error } = ValidateCreateLevel({ name ,type });
+  if (error) {
+    return res.status(400).json(error);
+  }
   try {
     const existingLevel = await prisma.levels.findUnique({
       where: { name },
@@ -14,11 +19,12 @@ async function createLevel(req, res) {
     }
 
     const newLevel = await prisma.levels.create({
-      data: { name },
+      data: { name,type },
     });
 
     res.status(201).json({ message: 'Niveau créé avec succès', level: newLevel });
   } catch (error) {
+    console.log(error.message)
     res.status(500).json({ message: 'Erreur lors de la création du niveau: ' + error.message });
   }
 }
@@ -54,15 +60,34 @@ async function getLevelById(req, res) {
     res.status(500).json({ message: 'Erreur lors de la récupération du niveau: ' + error.message });
   }
 }
+async function getLevelBySchool(req, res) {
+  const { school } = req.params;
+  try {
+    const levels = await prisma.levels.findMany({
+      where: { type:school },
+      select:{
+        id:true ,
+        name:true ,
+        type:true
+      },
+      orderBy:{
+        createdAt:'desc'
+      }
+    });
+    res.status(200).json(levels);
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur lors de la récupération du niveau: ' + error.message });
+  }
+}
 
 // Update Level
 async function updateLevel(req, res) {
   const { id } = req.params;
-  const { name } = req.body;
+  const { name,type } = req.body;
   try {
     const updatedLevel = await prisma.levels.update({
       where: { id: parseInt(id) },
-      data: { name },
+      data: { name,type },
     });
 
     res.status(200).json({ message: 'Niveau mis à jour avec succès', level: updatedLevel });
@@ -91,4 +116,5 @@ module.exports = {
   getLevelById,
   updateLevel,
   deleteLevel,
+  getLevelBySchool
 };

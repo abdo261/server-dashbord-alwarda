@@ -12,8 +12,7 @@ async function createStudent(req, res) {
     registredBy,
     levelId,
     centreId,
-    subjectIds,
-    school
+    subjectIds
   } = req.body;
 
   try {
@@ -44,7 +43,7 @@ async function createStudent(req, res) {
         subjects: {
           connect: subjectIds.map((id) => ({ id })),
         },
-        school
+        school:level.type
       },
       include: {
         user: true,
@@ -83,7 +82,7 @@ async function createStudent(req, res) {
       dueDate.setMonth(currentStartAt.getMonth() + 1);
 
       let have50 = 0;
-      if (school === "COLLEGE") {
+      if (level.type === "COLLEGE") {
         have50 = 50;
       } else if (isFirstPayment) {
         have50 = 50;
@@ -336,11 +335,11 @@ const getStudentsWithPayments = async (req, res) => {
         firstName: true,
         lastName: true,
         school:true,
+        levelId:true,
         payments: {
           orderBy: {
             createdAt: "asc",
           },
-
         },
       },
       orderBy: {

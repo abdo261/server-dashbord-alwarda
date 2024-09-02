@@ -1,9 +1,15 @@
 const { PrismaClient } = require("@prisma/client");
+const { ValidateCreateSubject } = require("../validation/sybject");
 const prisma = new PrismaClient();
 
 // Create a Subject
 async function createSubject(req, res) {
   const { name, pricePerMonth, levelId } = req.body;
+ 
+  const { error } = ValidateCreateSubject({ name, pricePerMonth, levelId});
+  if (error) {
+    return res.status(400).json(error);
+  }
   try {
     const existingSubject = await prisma.subjects.findFirst({
       where: { name, levelId: parseInt(levelId) },

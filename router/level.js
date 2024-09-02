@@ -5,6 +5,7 @@ const {
   getLevelById,
   updateLevel,
   deleteLevel,
+  getLevelBySchool
 } = require("../controllers/level");
 
 const levelRouter = express.Router();
@@ -17,6 +18,7 @@ levelRouter.get("/", getAllLevels);
 
 // Get a level by ID
 levelRouter.get("/:id", getLevelById);
+levelRouter.get("/school/:school", getLevelBySchool);
 
 // Update a level by ID
 levelRouter.put("/:id", updateLevel);
