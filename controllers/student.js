@@ -108,6 +108,7 @@ async function createStudent(req, res) {
               isPayed: false,
               pricePerMonth: s.pricePerMonth,
               discount: totalSubjects > 1 ? 50 : 0,
+              amountPaid:0
             }))
           ),
         },
@@ -288,6 +289,7 @@ async function updateStudent(req, res) {
               isPayed: false,
               pricePerMonth: s.pricePerMonth,
               discount: totalSubjects > 1 ? 50 : 0,
+              amountPaid:0
             }))
           ),
         },

@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE `students` MODIFY `registrationDate` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3);

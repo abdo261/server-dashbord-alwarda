@@ -8,7 +8,7 @@ const ValidateCreateLevel = (level) => {
             .trim()
             .min(2)
             .required()
-            .regex(/^[a-zA-ZÀ-ÿ][a-z0-9A-ZÀ-ÿ\s'_’.-]*$/) 
+            .regex(/^[a-z0-9A-ZÀ-ÿ\s'_’.-]*$/) 
             .messages({
                 'string.empty': 'Le nom est requis.',
                 'string.min': 'Le nom doit comporter au moins 3 caractères.',
