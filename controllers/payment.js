@@ -35,6 +35,7 @@ async function createPayment(req, res) {
       isPayed: false,
       pricePerMonth: subject.pricePerMonth,
       discount: subjects.length > 1 ? 50 : 0,
+      amountPayed:0
     }));
 
     // Create the payment record
@@ -115,7 +116,7 @@ async function getPaymentById(req, res) {
 
 async function updatePayment(req, res) {
   const { id } = req.params;
-  const { amountPaid, subjects, have50 } = req.body;
+  const { amountPaid, subjects, have50,amountDue } = req.body;
 
   try {
   
@@ -132,7 +133,7 @@ async function updatePayment(req, res) {
       where: { id: parseInt(id) },
       data: {
         amountPaid,
-        amountDue: payment.totalAmount - amountPaid,
+        amountDue:amountDue ? amountDue: payment.totalAmount - amountPaid,
         subjects,
         have50,
       },

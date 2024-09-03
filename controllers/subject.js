@@ -26,13 +26,18 @@ async function createSubject(req, res) {
     if (existingSubject) {
       return res.status(400).json({ message: " matiére existe déjà" });
     }
-
+const level = await prisma.levels.findUnique({
+  where:{
+    id:levelId
+  }
+})
     const newSubject = await prisma.subjects.create({
       data: {
         name,
         pricePerMonth,
         school,
         levelId: parseInt(levelId),
+<<<<<<< HEAD
       }, include: {
         level: true,
         _count: {
@@ -40,6 +45,9 @@ async function createSubject(req, res) {
             students: true,
           },
         },
+=======
+        school:level.type
+>>>>>>> 1a49d270e42ef29bf5f9c9520f7c78a5cf5f142c
       },
     });
 
@@ -119,12 +127,18 @@ async function updateSubject(req, res) {
     if (existSbject) {
       return res.status(400).json({ message: " matiére existe déjà" });
     }
+    const level = await prisma.levels.findUnique({
+      where:{
+        id:levelId
+      }
+    })
     const updatedSubject = await prisma.subjects.update({
       where: { id: parseInt(id) },
       data: {
         name,
         pricePerMonth,
         levelId: parseInt(levelId),
+        school:level.type
       }, include: {
         _count: {
           select: {
