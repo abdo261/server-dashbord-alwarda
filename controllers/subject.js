@@ -37,7 +37,6 @@ const level = await prisma.levels.findUnique({
         pricePerMonth,
         school,
         levelId: parseInt(levelId),
-<<<<<<< HEAD
       }, include: {
         level: true,
         _count: {
@@ -45,9 +44,6 @@ const level = await prisma.levels.findUnique({
             students: true,
           },
         },
-=======
-        school:level.type
->>>>>>> 1a49d270e42ef29bf5f9c9520f7c78a5cf5f142c
       },
     });
 
