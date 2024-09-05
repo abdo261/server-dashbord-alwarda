@@ -33,7 +33,9 @@ async function createLevel(req, res) {
 async function getAllLevels(req, res) {
   try {
     const levels = await prisma.levels.findMany({
-      include: { students: true },  // Include students for each level
+      include: { students: true }, orderBy:{
+        createdAt:"desc"
+      } // Include students for each level
     });
 
     res.status(200).json(levels);

@@ -1,4 +1,5 @@
 const { PrismaClient } = require("@prisma/client");
+const { ValidateCreateStudent } = require("../validation/students");
 const prisma = new PrismaClient();
 
 async function createStudent(req, res) {
@@ -14,21 +15,35 @@ async function createStudent(req, res) {
     centreId,
     subjectIds
   } = req.body;
-
+const {error}=ValidateCreateStudent({
+  firstName,
+  lastName,
+  phoneParent,
+  phone,
+  sex,
+  registrationDate,
+  registredBy,
+  levelId,
+  centreId,
+  subjectIds
+})
+if (error) {
+  return res.status(400).json(error);
+}
   try {
-    // Check if user exists
+
     const user = await prisma.users.findUnique({ where: { id: registredBy } });
     if (!user) return res.status(400).json({ message: "Utilisateur non trouvé" });
 
-    // Check if level exists
+
     const level = await prisma.levels.findUnique({ where: { id: levelId } });
     if (!level) return res.status(400).json({ message: "Niveau non trouvé" });
 
-    // Check if centre exists
+ 
     const centre = await prisma.centres.findUnique({ where: { id: centreId } });
     if (!centre) return res.status(400).json({ message: "Centre non trouvé" });
 
-    // Create new student
+
     const newStudent = await prisma.students.create({
       data: {
         firstName,
@@ -54,7 +69,7 @@ async function createStudent(req, res) {
       },
     });
 
-    // Retrieve subjects and calculate amounts
+
     const subjects = await prisma.subjects.findMany({
       where: { id: { in: subjectIds } },
       include: {
@@ -114,8 +129,8 @@ async function createStudent(req, res) {
         },
       });
 
-      // Move currentStartAt to the next month's start date
-      currentStartAt = new Date(dueDate); // set currentStartAt to the last dueDate
+
+      currentStartAt = new Date(dueDate); 
     }
 
     res.status(201).json({

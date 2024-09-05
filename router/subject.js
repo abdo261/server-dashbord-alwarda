@@ -5,6 +5,7 @@ const {
   getSubjectById,
   updateSubject,
   deleteSubject,
+  getAllSubjectsByLevel,
 } = require("../controllers/subject");
 
 const subjectRouter = express.Router();
@@ -14,6 +15,7 @@ subjectRouter.post("/", createSubject);
 
 // Get all subjects
 subjectRouter.get("/", getAllSubjects);
+subjectRouter.get("/level/:levelId", getAllSubjectsByLevel);
 
 // Get a subject by ID
 subjectRouter.get("/:id", getSubjectById);

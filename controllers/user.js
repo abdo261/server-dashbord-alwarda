@@ -1,6 +1,9 @@
 const { PrismaClient } = require("@prisma/client");
 const bcrypt = require("bcryptjs");
-const { ValidateCreateUser, ValidateUpdateUser } = require("../validation/user");
+const {
+  ValidateCreateUser,
+  ValidateUpdateUser,
+} = require("../validation/user");
 const prisma = new PrismaClient();
 
 function sanitizeUser(user) {
@@ -133,7 +136,6 @@ async function createUser(req, res) {
 }
 
 async function updateUser(req, res) {
-
   const { id } = req.params;
   const { firstName, lastName, email, password, phone, isOwner, centreId } =
     req.body;
@@ -174,7 +176,7 @@ async function updateUser(req, res) {
       email,
       phone,
       isOwner,
-      centre: centreId ? { connect: { id: centreId } } : undefined,
+      centre: centreId ? { connect: { id: centreId } } : { disconnect: true },
     };
 
     if (password) {
@@ -185,11 +187,11 @@ async function updateUser(req, res) {
       where: { id: parseInt(id) },
       data: updatedData,
       include: {
-       centre:{
-        select:{
-          name:true
-        }
-       }
+        centre: {
+          select: {
+            name: true,
+          },
+        },
       },
     });
 
