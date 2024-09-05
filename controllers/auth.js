@@ -2,7 +2,7 @@ const { PrismaClient } = require("@prisma/client");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const prisma = new PrismaClient();
-const {validateEmailAndPassword} =require('../validation/auth')
+const { validateEmailAndPassword } = require("../validation/auth");
 const JWT_SECRET = process.env.JWT_SECRET || "sucretky";
 
 function sanitizeUser(user) {
@@ -12,7 +12,7 @@ function sanitizeUser(user) {
 
 async function loginUser(req, res) {
   const { email, password } = req.body;
-  const { error } = validateEmailAndPassword({ email,password });
+  const { error } = validateEmailAndPassword({ email, password });
   if (error) {
     return res.status(400).json(error);
   }
@@ -22,12 +22,22 @@ async function loginUser(req, res) {
     });
 
     if (!user) {
-      return res.status(401).json({ message: "Identifiants incorrects" });
+      return res
+        .status(400)
+        .json({
+          email: ["Identifiants incorrects"],
+          password: ["Identifiants incorrects"],
+        });
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      return res.status(401).json({ message: "Identifiants incorrects" });
+      return res
+        .status(400)
+        .json({
+          email: ["Identifiants incorrects"],
+          password: ["Identifiants incorrects"],
+        });
     }
 
     const token = jwt.sign(
