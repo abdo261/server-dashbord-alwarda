@@ -15,7 +15,7 @@ async function seedCentres(count) {
 
     await prisma.centres.create({
       data: {
-        name: `${faker.company.name()}_${i}`,
+        name: `${"center"}_${i}`,
         location: faker.location.secondaryAddress(),
         color: uniqueColor,
       },
@@ -29,7 +29,7 @@ async function seedLevels(count) {
   for (let i = 0; i < count; i++) {
     let uniqueName;
     do {
-      uniqueName = `${faker.lorem.word()}_${faker.string.alphanumeric(5)}`;
+      uniqueName = `${"niveaux"}_${i}`;
     } while (usedNames.has(uniqueName));
     usedNames.add(uniqueName);
 
@@ -128,7 +128,7 @@ async function seed() {
   await seedLevels(4);
   await seedUsers(3);
   await seedSubjects(10);
-  await seedStudents(50);
+  // await seedStudents(50);
 }
 
 seed()
