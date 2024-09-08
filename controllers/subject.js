@@ -32,13 +32,15 @@ async function createSubject(req, res) {
       },
     });
     if (!level) {
-      return res.status(400).json({ message: " le Niveaux Selectioné  n'existe pas" });
+      return res
+        .status(400)
+        .json({ message: " le Niveaux Selectioné  n'existe pas" });
     }
     const newSubject = await prisma.subjects.create({
       data: {
         name,
         pricePerMonth,
-        school:level.type,
+        school: level.type,
         levelId: parseInt(levelId),
       },
       include: {
@@ -87,10 +89,10 @@ async function getAllSubjects(req, res) {
 }
 async function getAllSubjectsByLevel(req, res) {
   try {
-    const {levelId} = req.params
+    const { levelId } = req.params;
     const subjects = await prisma.subjects.findMany({
-      where:{
-        levelId:parseInt(levelId)
+      where: {
+        levelId: parseInt(levelId),
       },
       orderBy: {
         createdAt: "desc",
@@ -150,7 +152,7 @@ async function updateSubject(req, res) {
     }
     const level = await prisma.levels.findUnique({
       where: {
-        id: levelId,
+        id: parseInt(levelId),
       },
     });
     const updatedSubject = await prisma.subjects.update({
@@ -204,5 +206,5 @@ module.exports = {
   getSubjectById,
   updateSubject,
   deleteSubject,
-  getAllSubjectsByLevel
+  getAllSubjectsByLevel,
 };

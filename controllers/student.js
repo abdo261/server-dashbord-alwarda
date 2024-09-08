@@ -10,7 +10,7 @@ async function createStudent(req, res) {
     phone,
     sex,
     registrationDate,
-    registredBy,
+    
     levelId,
     centreId,
     subjectIds,
@@ -22,7 +22,7 @@ async function createStudent(req, res) {
     phone,
     sex,
     registrationDate,
-    registredBy,
+    registredBy:parseInt(req.user.id),
     levelId,
     centreId,
     subjectIds,
@@ -30,8 +30,9 @@ async function createStudent(req, res) {
   if (error) {
     return res.status(400).json(error);
   }
+  console.log(req.user.id)
   try {
-    const user = await prisma.users.findUnique({ where: { id: registredBy } });
+    const user = await prisma.users.findUnique({ where: { id: parseInt(req.user.id)} });
     if (!user)
       return res.status(400).json({ message: "Utilisateur non trouvé" });
 
@@ -51,7 +52,7 @@ async function createStudent(req, res) {
         registrationDate: registrationDate
           ? new Date(registrationDate)
           : new Date(),
-        registredBy,
+        registredBy:parseInt(req.user.id),
         levelId,
         centreId,
         subjects: {
@@ -224,7 +225,7 @@ async function updateStudent(req, res) {
     centreId,
     subjectIds,
     currentMonth = false,
-    school,
+    
   } = req.body;
 
   try {
@@ -288,17 +289,14 @@ async function updateStudent(req, res) {
 
     const currentDate = new Date();
 
-    // Define `updateFromDate` based on `currentMonth`
     let updateFromDate;
     if (currentMonth) {
-      // Update payments starting from the current month and future payments
       updateFromDate = new Date(
         currentDate.getFullYear(),
         currentDate.getMonth(),
         1
       );
     } else {
-      // Update future payments only (excluding the current month)
       updateFromDate = new Date(
         currentDate.getFullYear(),
         currentDate.getMonth() + 1,
@@ -310,8 +308,8 @@ async function updateStudent(req, res) {
     const paymentsToUpdate = await prisma.payments.findMany({
       where: {
         studentId: updatedStudent.id,
-        dueDate: {
-          gte: updateFromDate, // Update future payments (or current month if `currentMonth` is true)
+        startAt: {
+          gte: updateFromDate,
         },
       },
     });

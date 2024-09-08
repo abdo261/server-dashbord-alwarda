@@ -20,6 +20,7 @@ async function createLevel(req, res) {
 
     const newLevel = await prisma.levels.create({
       data: { name,type },
+      include:{ students: true}
     });
 
     res.status(201).json({ message: 'Niveau créé avec succès', level: newLevel });
@@ -90,6 +91,7 @@ async function updateLevel(req, res) {
     const updatedLevel = await prisma.levels.update({
       where: { id: parseInt(id) },
       data: { name,type },
+      include:{ students: true}
     });
 
     res.status(200).json({ message: 'Niveau mis à jour avec succès', level: updatedLevel });

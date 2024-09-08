@@ -7,7 +7,7 @@ const {
 const prisma = new PrismaClient();
 
 function sanitizeUser(user) {
-  const { password, ...userWithoutPassword } = user;
+  const { password, students, ...userWithoutPassword } = user;
   return userWithoutPassword;
 }
 
@@ -42,9 +42,10 @@ async function getUserById(req, res) {
     const user = await prisma.users.findUnique({
       where: { id: parseInt(id) },
       include: {
-        centre: {
+        centre: true,
+        students: {
           select: {
-            name: true,
+            sex: true,
           },
         },
       },
@@ -53,10 +54,30 @@ async function getUserById(req, res) {
     if (!user) {
       return res.status(404).json({ message: "Utilisateur non trouvé" });
     }
-
-    const sanitizedUser = sanitizeUser(user);
-    res.status(200).json(sanitizedUser);
+    if (user.isOwner) {
+      const students = await prisma.students.findMany({ select: { sex:true } });
+      const countSex = students.reduce(
+        (acc, student) => {
+          acc[student.sex] = (acc[student.sex] || 0) + 1;
+          return acc;
+        },
+        { HOMME: 0, FEMME: 0 }
+      );
+      const sanitizedUser = sanitizeUser(user);
+      return res.status(200).json({ ...sanitizedUser, countSex });
+    } else {
+      const countSex = user.students.reduce(
+        (acc, student) => {
+          acc[student.sex] = (acc[student.sex] || 0) + 1;
+          return acc;
+        },
+        { HOMME: 0, FEMME: 0 }
+      );
+      const sanitizedUser = sanitizeUser(user);
+      return res.status(200).json({ ...sanitizedUser, countSex });
+    }
   } catch (error) {
+    console.log(error)
     res.status(500).json({
       message:
         "Erreur lors de la récupération de l'utilisateur: " + error.message,

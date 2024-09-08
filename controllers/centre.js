@@ -12,9 +12,7 @@ async function getAllCenters(req, res) {
           select: {
             firstName: true,
             lastName: true,
-          },
-          where: {
-            isOwner: false,
+            id: true,
           },
         },
         students: true,
@@ -23,6 +21,7 @@ async function getAllCenters(req, res) {
         createdAt: "desc",
       },
     });
+
     res.status(200).json(centres);
   } catch (error) {
     res.status(500).json({
@@ -44,9 +43,9 @@ async function getCenterById(req, res) {
             subjects: true,
             payments: true,
           },
-          orderBy:{
-            createdAt:"desc"
-          }
+          orderBy: {
+            createdAt: "desc",
+          },
         },
         user: true,
       },
@@ -136,26 +135,27 @@ async function updateCenter(req, res) {
     if (name && name !== existingCentre.name) {
       const nameExists = await prisma.centres.findUnique({
         where: {
-          name
-          
-        }
+          name,
+        },
       });
       if (nameExists) {
         return res
           .status(400)
-          .json({ name:[ `Un autre centre avec le nome ${name}  existe déjà`] });
+          .json({
+            name: [`Un autre centre avec le nome ${name}  existe déjà`],
+          });
       }
     }
     if (color && color !== existingCentre.color) {
       const colorExists = await prisma.centres.findUnique({
         where: {
-          color
-        }
+          color,
+        },
       });
       if (colorExists) {
         return res
           .status(400)
-          .json({ color:[ `Un autre centre avec cette coleur existe déjà`] });
+          .json({ color: [`Un autre centre avec cette coleur existe déjà`] });
       }
     }
 
@@ -191,7 +191,6 @@ async function updateCenter(req, res) {
 async function deleteCenter(req, res) {
   const { id } = req.params;
   try {
-    
     const existingcentre = await prisma.centres.findUnique({
       where: { id: parseInt(id) },
     });
@@ -204,7 +203,7 @@ async function deleteCenter(req, res) {
     });
     res.status(200).json({ message: "Centre supprimé avec succès" });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res.status(500).json({
       message: "Erreur lors de la suppression du centre: " + error.message,
     });
