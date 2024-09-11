@@ -14,7 +14,7 @@ async function createPayment(req, res) {
   } = req.body;
 
   try {
-    // Fetch subjects for the student
+
     const subjects = await prisma.subjects.findMany({
       where: {
         students: {
@@ -28,7 +28,6 @@ async function createPayment(req, res) {
       },
     });
 
-    // Map the subjects for JSON storage
     const subjectData = subjects.map((subject) => ({
       name: subject.name,
       level: subject.level.name,
@@ -38,7 +37,7 @@ async function createPayment(req, res) {
       amountPayed:0
     }));
 
-    // Create the payment record
+
     const newPayment = await prisma.payments.create({
       data: {
         studentId,
@@ -222,9 +221,7 @@ async function getFullyPaidPayments(req, res) {
         student: true,
       },
     });
-  //   const fullyPaidPayments = await prisma.$queryRaw`
-  //   SELECT * FROM Payments WHERE amountPaid = totalAmount;
-  // `;
+
     res.status(200).json(fullyPaidPayments);
   } catch (error) {
     res.status(500).json({

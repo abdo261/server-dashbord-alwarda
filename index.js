@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const http = require("http");
 const { Server } = require("socket.io");
-
+const jwt = require('jsonwebtoken')
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -59,18 +59,53 @@ app.use("/api/users", userRouter);
 app.use("/api/payments", paymentsRouter);
 app.use("/api/auth", authRouterRouter);
 
-// Socket.IO event handling
-io.on("connection", (socket) => {
-  console.log(`User connected: ${socket.id}`);
 
-  socket.on("disconnect", () => {
-    console.log(`User disconnected: ${socket.id}`);
+
+const connectedClients = []; 
+const socketToUserMap = {}; 
+
+io.on('connection', (socket) => {
+
+  socket.on('conectCLintId', (token) => {
+    try {
+
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secretkey');
+      const userId = decoded.id;
+
+
+      if (!connectedClients.includes(userId)) {
+        connectedClients.push(userId);
+      }
+
+      socketToUserMap[socket.id] = userId;
+
+      console.log(`User connected: ${userId}`);
+      
+  
+      io.emit('connectedClients', connectedClients);
+
+    } catch (err) {
+      console.error('Token verification failed:', err);
+    }
   });
 
-  socket.on("message", (data) => {
-    console.log(`Message from ${socket.id}:`, data);
+  socket.on('disconnect', () => {
 
-    io.emit("message", data);
+    const userId = socketToUserMap[socket.id];
+
+    if (userId) {
+
+      const index = connectedClients.indexOf(userId);
+      if (index !== -1) {
+        connectedClients.splice(index, 1);
+        console.log(`User disconnected: ${userId}`);
+      }
+     
+      delete socketToUserMap[socket.id];
+    }
+
+   
+    io.emit('connectedClients', connectedClients);
   });
 });
 

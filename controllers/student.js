@@ -111,7 +111,7 @@ async function createStudent(req, res) {
         have50 = 50;
       } else if (isFirstPayment) {
         have50 = 50;
-        isFirstPayment = false;
+        isFirstPayment ;
       }
 
       await prisma.payments.create({
@@ -224,12 +224,11 @@ async function updateStudent(req, res) {
     levelId,
     centreId,
     subjectIds,
-    currentMonth = false,
-    
+    currentMonth,
   } = req.body;
 
   try {
-    // Check existence of related entities
+    
     const user = await prisma.users.findUnique({
       where: { id: parseInt(registredBy) },
     });
@@ -246,7 +245,7 @@ async function updateStudent(req, res) {
     });
     if (!centre) return res.status(400).json({ message: "Centre non trouvé" });
 
-    // Update student
+  
     const updatedStudent = await prisma.students.update({
       where: { id: parseInt(id) },
       data: {
@@ -273,7 +272,6 @@ async function updateStudent(req, res) {
       },
     });
 
-    // Get subject details for payments
     const subjects = await prisma.subjects.findMany({
       where: { id: { in: subjectIds.map((i) => parseInt(i)) } },
       include: { level: true },
@@ -290,12 +288,25 @@ async function updateStudent(req, res) {
     const currentDate = new Date();
 
     let updateFromDate;
+    let oldSubjects = []; 
+
     if (currentMonth) {
       updateFromDate = new Date(
         currentDate.getFullYear(),
         currentDate.getMonth(),
         1
       );
+      const currentStartAt = new Date();
+      const monthName = currentStartAt.toLocaleString("default", {
+        month: "long",
+      });
+      
+      const currentPayment = await prisma.payments.findFirst({
+        where: { month: monthName, studentId: updatedStudent.id },
+      });
+
+    
+      oldSubjects = currentPayment ? JSON.parse(currentPayment.subjects) : [];
     } else {
       updateFromDate = new Date(
         currentDate.getFullYear(),
@@ -304,7 +315,7 @@ async function updateStudent(req, res) {
       );
     }
 
-    // Fetch payments to update (based on `currentMonth`)
+
     const paymentsToUpdate = await prisma.payments.findMany({
       where: {
         studentId: updatedStudent.id,
@@ -314,30 +325,36 @@ async function updateStudent(req, res) {
       },
     });
 
-    // Update each payment
     for (const payment of paymentsToUpdate) {
+      
+      const updatedSubjects = subjects.map((s) => {
+        
+        const oldSubject = oldSubjects.find((old) => old.id === s.id);
+
+        return {
+          id: s.id,
+          name: s.name,
+          level: s.level.name,
+          pricePerMonth: s.pricePerMonth,
+          discount: totalSubjects > 1 ? 50 : 0,
+          amountPaid: oldSubject ? oldSubject.amountPaid : 0, 
+          isPayed: oldSubject ? oldSubject.isPayed : false, 
+        };
+      });
+
+     
       await prisma.payments.update({
         where: { id: payment.id },
         data: {
           totalAmount: finalAmount,
           discount: discount,
           amountDue: finalAmount - payment.amountPaid,
-          subjects: JSON.stringify(
-            subjects.map((s) => ({
-              id: s.id,
-              name: s.name,
-              level: s.level.name,
-              isPayed: false,
-              pricePerMonth: s.pricePerMonth,
-              discount: totalSubjects > 1 ? 50 : 0,
-              amountPaid: 0,
-            }))
-          ),
+          subjects: JSON.stringify(updatedSubjects),
         },
       });
     }
 
-    // Respond with success
+   
     res.status(200).json({
       message: "Étudiant et paiements mis à jour avec succès",
       student: updatedStudent,
